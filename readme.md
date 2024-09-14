@@ -538,3 +538,618 @@ console.log(MathUtil.calculateArea(5));  // Access static method
 - **Constructor**: A special method used to initialize objects when they are created.
 
 These concepts are essential for writing structured and maintainable code in object-oriented programming with TypeScript.
+
+#### This Keyword
+
+The `this` keyword in TypeScript (and JavaScript) refers to the context or object on which the current code is being executed. It helps in accessing properties and methods of the current object within a class or function.
+
+### Key Aspects of the `this` Keyword:
+
+1. **Inside a Class**: 
+   In a class, `this` refers to the current instance of the class. It is used to access the class properties and methods.
+
+#### Example:
+```typescript
+class Person {
+  name: string;
+  age: number;
+
+  constructor(name: string, age: number) {
+    this.name = name;  // 'this' refers to the current instance of the Person class
+    this.age = age;
+  }
+
+  greet() {
+    console.log(`Hello, my name is ${this.name} and I'm ${this.age} years old.`);
+  }
+}
+
+const person1 = new Person("Alice", 25);
+person1.greet();  // Outputs: Hello, my name is Alice and I'm 25 years old.
+```
+
+In the `greet` method, `this.name` and `this.age` refer to the instance properties of the object (`person1`) that called the method.
+
+### 2. **In Regular Functions**:
+When a function is a regular function (not an arrow function) and is called as a method of an object, `this` refers to the object that called the method.
+
+#### Example:
+```typescript
+const car = {
+  brand: "Toyota",
+  model: "Corolla",
+  describe() {
+    console.log(`This car is a ${this.brand} ${this.model}.`);
+  }
+};
+
+car.describe();  // 'this' refers to the 'car' object, Outputs: "This car is a Toyota Corolla."
+```
+
+In this example, `this` refers to the `car` object because `describe` is called as a method of `car`.
+
+### 3. **Arrow Functions**:
+In arrow functions, `this` is lexically bound, meaning it uses the value of `this` from the surrounding context where the arrow function was created. Arrow functions do not have their own `this`.
+
+#### Example:
+```typescript
+class Counter {
+  count = 0;
+
+  increaseCount = () => {
+    console.log(this.count);  // 'this' refers to the instance of the class
+    this.count++;
+  }
+}
+
+const counter = new Counter();
+counter.increaseCount();  // Outputs: 0
+counter.increaseCount();  // Outputs: 1
+```
+
+In this case, `this` in the arrow function refers to the instance of the `Counter` class, even if the method is called from a different context later.
+
+### 4. **Binding `this` in Methods**:
+Sometimes, when passing methods as callbacks, the value of `this` might change. To preserve the original value of `this`, you can use the `bind` method, arrow functions, or store `this` in a variable.
+
+#### Example with `bind`:
+```typescript
+class Button {
+  label: string;
+
+  constructor(label: string) {
+    this.label = label;
+  }
+
+  click() {
+    console.log(`Button ${this.label} clicked!`);
+  }
+}
+
+const button = new Button("Submit");
+const handleClick = button.click.bind(button);  // Binding 'this' to 'button'
+handleClick();  // Outputs: "Button Submit clicked!"
+```
+
+If you don't bind `this`, calling `handleClick` may result in `this` being `undefined` or referring to another object, depending on the context.
+
+### 5. **Global Context**:
+In global functions (outside of classes or objects), `this` refers to the global object. However, in TypeScript with `strict mode` (`"use strict"`), `this` in global functions will be `undefined`.
+
+#### Example (Global Context):
+```typescript
+function show() {
+  console.log(this);
+}
+
+show();  // In non-strict mode, 'this' refers to the global object (window in browsers).
+```
+
+In strict mode or when running TypeScript with `"strict": true` in `tsconfig.json`, `this` will be `undefined` inside functions that are not part of an object or class.
+
+### Summary:
+- **`this` in a class** refers to the instance of the class.
+- **`this` in a method** refers to the object that called the method.
+- **`this` in an arrow function** refers to the context in which the arrow function was created (lexical scoping).
+- **`this` can be bound** to a specific context using `.bind()`, or you can use arrow functions to preserve the value of `this`.
+- **In global functions**, `this` refers to the global object (in non-strict mode).
+
+
+#### Access Modifiers
+
+In TypeScript, **access modifiers** are used to control the visibility of class members (properties and methods). There are three main access modifiers:
+
+### 1. **`public`** (Default)
+   - The `public` access modifier allows class members to be accessible from **anywhere**. 
+   - It is the default modifier, so even if no access modifier is explicitly defined, the member is treated as `public`.
+
+#### Example:
+```typescript
+class Person {
+  public name: string;  // 'public' keyword is optional since it is the default
+
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  public greet() {
+    console.log(`Hello, my name is ${this.name}.`);
+  }
+}
+
+const person = new Person("Alice");
+console.log(person.name);  // Accessible: "Alice"
+person.greet();            // Accessible: "Hello, my name is Alice."
+```
+
+### 2. **`private`**
+   - The `private` access modifier restricts the visibility of class members to **within the class itself**. 
+   - Members marked as `private` cannot be accessed or modified from outside the class, even by instances of the class.
+
+#### Example:
+```typescript
+class Employee {
+  private salary: number;
+
+  constructor(salary: number) {
+    this.salary = salary;
+  }
+
+  public getSalary(): number {
+    return this.salary;  // Accessible within the class
+  }
+
+  private setSalary(newSalary: number) {
+    this.salary = newSalary;  // Private method, only accessible within the class
+  }
+}
+
+const employee = new Employee(50000);
+console.log(employee.getSalary());  // Accessible through public method: 50000
+// console.log(employee.salary);    // Error: 'salary' is private
+// employee.setSalary(60000);       // Error: 'setSalary' is private
+```
+
+Here, `salary` is a `private` property, and `setSalary` is a `private` method, both of which cannot be accessed outside the class.
+
+### 3. **`protected`**
+   - The `protected` access modifier allows members to be accessible **within the class** and **in subclasses** (derived classes), but **not from outside**.
+   - This is useful when you want to allow derived classes to access or override the properties/methods, but not expose them publicly.
+
+#### Example:
+```typescript
+class Person {
+  protected age: number;
+
+  constructor(age: number) {
+    this.age = age;
+  }
+
+  protected getAge(): number {
+    return this.age;  // Accessible within the class
+  }
+}
+
+class Student extends Person {
+  public showAge() {
+    console.log(this.age);  // Accessible in the subclass
+    console.log(this.getAge());  // Protected method accessible in subclass
+  }
+}
+
+const student = new Student(21);
+student.showAge();  // Accessible: 21
+// console.log(student.age);  // Error: 'age' is protected
+// console.log(student.getAge());  // Error: 'getAge' is protected
+```
+
+In this example, the `age` property and `getAge` method are marked as `protected`, so they are only accessible within the `Person` class and its subclass `Student`, but not outside.
+
+### Summary of Access Modifiers
+
+| Modifier    | Visibility                                                        |
+|-------------|-------------------------------------------------------------------|
+| **`public`**  | Accessible from **anywhere** (inside and outside the class).       |
+| **`private`** | Accessible **only within the class** where it is defined.          |
+| **`protected`** | Accessible **within the class** and its **subclasses**, but not outside. |
+
+### Example Combining All Modifiers:
+
+```typescript
+class Vehicle {
+  public brand: string;       // Can be accessed from anywhere
+  private engineNumber: string;  // Can only be accessed inside the class
+  protected speed: number;    // Can be accessed in this class and its subclasses
+
+  constructor(brand: string, engineNumber: string, speed: number) {
+    this.brand = brand;
+    this.engineNumber = engineNumber;
+    this.speed = speed;
+  }
+
+  public describe() {
+    console.log(`This is a ${this.brand} moving at ${this.speed} km/h.`);
+  }
+
+  private getEngineNumber() {
+    return this.engineNumber;  // Private method, accessible only within the class
+  }
+
+  protected increaseSpeed(increment: number) {
+    this.speed += increment;  // Protected method, accessible in subclasses
+  }
+}
+
+class Car extends Vehicle {
+  constructor(brand: string, engineNumber: string, speed: number) {
+    super(brand, engineNumber, speed);
+  }
+
+  public accelerate() {
+    this.increaseSpeed(20);  // Can access protected method from superclass
+    console.log(`${this.brand} is now moving at ${this.speed} km/h.`);
+  }
+}
+
+const myCar = new Car("Tesla", "ENG123456", 60);
+myCar.describe();  // Outputs: "This is a Tesla moving at 60 km/h."
+myCar.accelerate();  // Outputs: "Tesla is now moving at 80 km/h."
+
+// myCar.engineNumber;  // Error: 'engineNumber' is private
+// myCar.increaseSpeed(30);  // Error: 'increaseSpeed' is protected
+```
+
+In this example, the `brand` is `public`, the `engineNumber` is `private`, and the `speed` and `increaseSpeed` are `protected`. These access levels control where and how each member can be accessed.
+
+
+### Getters and Setters
+In TypeScript, **getters** and **setters** allow you to define methods that are used to control access to the properties of a class. They provide a way to encapsulate data, enabling logic to be executed when accessing or modifying class properties.
+
+### **Getters (`get`)**:
+- Used to **retrieve** or **access** the value of a private or protected property.
+- They act like a property but allow additional logic to be executed when the value is accessed.
+
+### **Setters (`set`)**:
+- Used to **set** or **update** the value of a private or protected property.
+- They also act like a property but allow additional logic to be executed when the value is modified, such as validation or transformation.
+
+### Syntax of Getter and Setter:
+
+```typescript
+class Person {
+  private _name: string;  // Private property
+
+  constructor(name: string) {
+    this._name = name;
+  }
+
+  // Getter
+  get name(): string {
+    return this._name;
+  }
+
+  // Setter
+  set name(newName: string) {
+    if (newName.length > 0) {
+      this._name = newName;
+    } else {
+      console.log("Name can't be empty!");
+    }
+  }
+}
+
+const person = new Person("John");
+console.log(person.name);  // Using the getter, Outputs: "John"
+
+person.name = "Alice";  // Using the setter
+console.log(person.name);  // Outputs: "Alice"
+
+person.name = "";  // Invalid value
+// Outputs: "Name can't be empty!"
+```
+
+### Key Points:
+- The `get` keyword defines a getter method, which is used to retrieve the value of a property.
+- The `set` keyword defines a setter method, which is used to update the value of a property.
+- Getters and setters are invoked like properties, not methods (i.e., no parentheses when accessing them).
+
+### Example with Data Validation:
+
+Getters and setters are particularly useful for validation, ensuring certain conditions are met before a value is set.
+
+```typescript
+class Rectangle {
+  private _width: number;
+  private _height: number;
+
+  constructor(width: number, height: number) {
+    this._width = width;
+    this._height = height;
+  }
+
+  // Getter for width
+  get width(): number {
+    return this._width;
+  }
+
+  // Setter for width
+  set width(value: number) {
+    if (value > 0) {
+      this._width = value;
+    } else {
+      console.log("Width must be positive.");
+    }
+  }
+
+  // Getter for height
+  get height(): number {
+    return this._height;
+  }
+
+  // Setter for height
+  set height(value: number) {
+    if (value > 0) {
+      this._height = value;
+    } else {
+      console.log("Height must be positive.");
+    }
+  }
+
+  // Calculate area
+  get area(): number {
+    return this._width * this._height;
+  }
+}
+
+const rectangle = new Rectangle(10, 20);
+console.log(rectangle.area);  // Outputs: 200
+
+rectangle.width = 15;  // Using the setter to change the width
+console.log(rectangle.area);  // Outputs: 300
+
+rectangle.height = -5;  // Invalid height
+// Outputs: "Height must be positive."
+```
+
+### Explanation:
+- The `width` and `height` properties are **private** (`_width`, `_height`), and they can only be accessed through the getter and setter methods.
+- The setter methods include validation to ensure that only positive values are accepted.
+- The `area` is a **read-only** property (only a getter) that calculates the area based on the width and height.
+
+### Benefits of Getters and Setters:
+1. **Encapsulation**: You can keep your class properties private or protected, and expose them only through controlled getter and setter methods.
+2. **Validation**: Setters allow you to validate data before setting a property, ensuring that only valid data is assigned.
+3. **Computed Properties**: Getters can calculate values dynamically, like the `area` in the example above.
+4. **Data Transformation**: Setters can transform or manipulate data before setting the property.
+
+### Summary:
+- **Getters** (`get`) allow you to access and possibly compute property values.
+- **Setters** (`set`) allow you to validate or modify property values before setting them.
+- Getters and setters provide a way to encapsulate and protect class properties while offering controlled access and modification.
+
+#### Static Members
+
+In TypeScript, **static members** (also known as static properties and methods) belong to the class itself rather than to any instance of the class. They are shared among all instances of the class, meaning there is only one copy of a static member, which can be accessed directly on the class rather than on instances.
+
+### Key Points:
+
+1. **Static Properties**:
+   - Defined using the `static` keyword.
+   - Not accessible through instances of the class, but through the class itself.
+   - Useful for constants, utility functions, or any data that is common to all instances.
+
+2. **Static Methods**:
+   - Defined using the `static` keyword.
+   - Can be called directly on the class, not on instances.
+   - Useful for operations or utilities that do not depend on instance-specific data.
+
+### Syntax and Examples
+
+#### Static Properties
+
+```typescript
+class MathUtility {
+  static PI: number = 3.14159;  // Static property
+
+  static getCircleArea(radius: number): number {
+    return MathUtility.PI * radius * radius;  // Access static property in a static method
+  }
+}
+
+console.log(MathUtility.PI);  // Access static property directly on the class: Outputs: 3.14159
+console.log(MathUtility.getCircleArea(5));  // Call static method directly on the class: Outputs: 78.53975
+```
+
+In this example, `PI` is a static property, and `getCircleArea` is a static method. Both are accessed directly on the `MathUtility` class.
+
+#### Static Methods
+
+Static methods are typically used for utility functions or factory methods that don't need to access instance-specific data.
+
+```typescript
+class Converter {
+  static inchesToCentimeters(inches: number): number {
+    return inches * 2.54;
+  }
+
+  static kilogramsToPounds(kilograms: number): number {
+    return kilograms * 2.20462;
+  }
+}
+
+console.log(Converter.inchesToCentimeters(10));  // Outputs: 25.4
+console.log(Converter.kilogramsToPounds(5));     // Outputs: 11.0231
+```
+
+In this example, `inchesToCentimeters` and `kilogramsToPounds` are static methods that perform conversions. They can be called directly on the `Converter` class.
+
+### Static vs. Instance Members
+
+- **Static Members**:
+  - Belong to the class itself.
+  - Accessed via `ClassName.memberName`.
+  - Useful for data or functionality that is common to all instances.
+
+- **Instance Members**:
+  - Belong to instances of the class.
+  - Accessed via `instanceName.memberName`.
+  - Useful for data or behavior that is specific to each instance.
+
+#### Example of Static vs. Instance Members
+
+```typescript
+class Example {
+  static staticProperty: string = "Static";
+  instanceProperty: string = "Instance";
+
+  static staticMethod() {
+    console.log("Static method called");
+  }
+
+  instanceMethod() {
+    console.log("Instance method called");
+  }
+}
+
+console.log(Example.staticProperty);  // Access static property
+Example.staticMethod();  // Call static method
+
+const exampleInstance = new Example();
+console.log(exampleInstance.instanceProperty);  // Access instance property
+exampleInstance.instanceMethod();  // Call instance method
+
+// Static members cannot be accessed through instances
+// console.log(exampleInstance.staticProperty);  // Error: Property 'staticProperty' does not exist on type 'Example'
+// exampleInstance.staticMethod();  // Error: Property 'staticMethod' does not exist on type 'Example'
+```
+
+In this example, `staticProperty` and `staticMethod` are static members of `Example`, while `instanceProperty` and `instanceMethod` are instance members.
+
+### Use Cases for Static Members
+
+1. **Utility Functions**: Functions that perform operations not reliant on instance state, such as mathematical operations or conversions.
+2. **Constants**: Values that are shared among all instances and do not change, such as configuration values or fixed constants.
+3. **Factory Methods**: Methods that create and return instances of the class, often used to encapsulate complex creation logic.
+
+### Summary
+
+- **Static Properties and Methods** belong to the class and are accessed via `ClassName.memberName`.
+- They are useful for functionality that is common to all instances or for utility functions that do not require instance-specific data.
+- **Instance Properties and Methods** belong to individual instances of the class and are accessed via `instanceName.memberName`.
+
+
+## Abstract Classes
+
+In TypeScript, **abstract classes** are a way to define a base class that cannot be instantiated directly but can be extended by other classes. They are useful for defining a common interface or base functionality that derived classes must implement. Abstract classes can contain both fully implemented methods (concrete methods) and methods that must be implemented by derived classes (abstract methods).
+
+### Key Points:
+
+1. **Abstract Methods**:
+   - Methods declared with the `abstract` keyword.
+   - They do not have an implementation in the abstract class and must be implemented by any non-abstract subclasses.
+   
+2. **Concrete Methods**:
+   - Regular methods that have an implementation in the abstract class.
+   - Subclasses can use these methods as-is or override them if needed.
+
+3. **Abstract Properties**:
+   - Similar to abstract methods, abstract properties do not have an initializer in the abstract class and must be defined in subclasses.
+
+### Syntax and Examples
+
+#### Defining an Abstract Class
+
+```typescript
+abstract class Shape {
+  abstract getArea(): number;  // Abstract method
+
+  public describe(): void {
+    console.log(`This is a shape with area: ${this.getArea()}`);
+  }
+}
+```
+
+In this example, `Shape` is an abstract class with an abstract method `getArea()` and a concrete method `describe()`.
+
+#### Extending an Abstract Class
+
+```typescript
+class Rectangle extends Shape {
+  constructor(private width: number, private height: number) {
+    super();  // Call the constructor of the abstract base class
+  }
+
+  getArea(): number {
+    return this.width * this.height;  // Implementing the abstract method
+  }
+}
+
+class Circle extends Shape {
+  constructor(private radius: number) {
+    super();  // Call the constructor of the abstract base class
+  }
+
+  getArea(): number {
+    return Math.PI * this.radius * this.radius;  // Implementing the abstract method
+  }
+}
+```
+
+In this example, `Rectangle` and `Circle` are concrete classes that extend `Shape` and provide implementations for the `getArea` method.
+
+#### Using Abstract Classes
+
+```typescript
+const rectangle = new Rectangle(10, 5);
+const circle = new Circle(7);
+
+rectangle.describe();  // Outputs: "This is a shape with area: 50"
+circle.describe();     // Outputs: "This is a shape with area: 153.93804002589985"
+
+// const shape = new Shape();  // Error: Cannot create an instance of an abstract class
+```
+
+### Key Features of Abstract Classes:
+
+1. **Cannot Be Instantiated**: Abstract classes cannot be instantiated directly. They are meant to be extended by other classes.
+
+2. **Common Interface**: Abstract classes provide a common interface and/or base functionality for derived classes. This allows you to define a common set of methods and properties that all derived classes must implement or use.
+
+3. **Partially Implemented**: Abstract classes can have both abstract methods and fully implemented methods. This allows you to provide default behavior that subclasses can either use or override.
+
+4. **Abstract Properties**: You can also define abstract properties in abstract classes, which must be defined in derived classes.
+
+#### Example with Abstract Properties
+
+```typescript
+abstract class Animal {
+  abstract sound: string;  // Abstract property
+
+  abstract makeSound(): void;  // Abstract method
+
+  public sleep(): void {
+    console.log("Zzz...");
+  }
+}
+
+class Dog extends Animal {
+  sound: string = "Bark";  // Implementing the abstract property
+
+  makeSound(): void {
+    console.log(this.sound);  // Implementing the abstract method
+  }
+}
+
+const dog = new Dog();
+dog.makeSound();  // Outputs: "Bark"
+dog.sleep();      // Outputs: "Zzz..."
+```
+
+### Summary
+
+- **Abstract Classes**: Serve as a blueprint for other classes. They cannot be instantiated directly.
+- **Abstract Methods**: Methods without implementation that must be implemented in derived classes.
+- **Concrete Methods**: Methods with implementation that can be used as-is or overridden in derived classes.
+- **Abstract Properties**: Properties without initializers that must be defined in derived classes.
+
+Abstract classes are a powerful tool for enforcing a common interface or base functionality across a hierarchy of classes, making your code more modular and maintainable.
