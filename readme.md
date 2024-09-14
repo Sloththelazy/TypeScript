@@ -1153,3 +1153,902 @@ dog.sleep();      // Outputs: "Zzz..."
 - **Abstract Properties**: Properties without initializers that must be defined in derived classes.
 
 Abstract classes are a powerful tool for enforcing a common interface or base functionality across a hierarchy of classes, making your code more modular and maintainable.
+
+##Functions
+
+In TypeScript, functions can accept other functions as parameters, which allows for the implementation of callbacks. Callbacks are a fundamental concept in JavaScript and TypeScript for handling asynchronous operations, events, or passing control between functions. Here’s a detailed overview of how to use callbacks in TypeScript.
+
+### 1. **Basic Callback Function**
+
+A callback function is simply a function passed as an argument to another function and executed after some operation or event.
+
+#### Example:
+
+```typescript
+function greet(name: string, callback: (message: string) => void): void {
+  const greeting = `Hello, ${name}!`;
+  callback(greeting);
+}
+
+function logMessage(message: string): void {
+  console.log(message);
+}
+
+greet('Alice', logMessage);  // Outputs: "Hello, Alice!"
+```
+
+In this example:
+- `greet` function takes a `name` and a callback function `callback`.
+- The `callback` function is invoked with a message after the greeting is created.
+- `logMessage` is passed as a callback to `greet`, and it logs the message to the console.
+
+### 2. **Callback with Parameters**
+
+Callbacks can also have parameters that can be passed from the calling function.
+
+#### Example:
+
+```typescript
+function processNumbers(a: number, b: number, callback: (result: number) => void): void {
+  const sum = a + b;
+  callback(sum);
+}
+
+processNumbers(5, 3, (result) => {
+  console.log(`The sum is ${result}`);  // Outputs: "The sum is 8"
+});
+```
+
+Here:
+- `processNumbers` performs a calculation and passes the result to the callback.
+- An inline callback function is used to log the result.
+
+### 3. **Using Callback Types**
+
+You can define a specific type for a callback function to ensure type safety.
+
+#### Example:
+
+```typescript
+type Callback = (result: number) => void;
+
+function multiplyNumbers(a: number, b: number, callback: Callback): void {
+  const product = a * b;
+  callback(product);
+}
+
+multiplyNumbers(4, 7, (result) => {
+  console.log(`The product is ${result}`);  // Outputs: "The product is 28"
+});
+```
+
+In this example:
+- `Callback` is a type alias for functions that accept a `number` and return `void`.
+- `multiplyNumbers` uses this type to ensure that the callback conforms to the expected signature.
+
+### 4. **Async Callbacks**
+
+Callbacks are often used in asynchronous operations, such as reading files or making network requests.
+
+#### Example with Asynchronous Callback:
+
+```typescript
+function fetchData(callback: (data: string) => void): void {
+  setTimeout(() => {
+    const data = 'Fetched data';
+    callback(data);
+  }, 1000);  // Simulates an async operation with a 1-second delay
+}
+
+fetchData((data) => {
+  console.log(`Received: ${data}`);  // Outputs: "Received: Fetched data"
+});
+```
+
+Here:
+- `fetchData` simulates an asynchronous operation using `setTimeout`.
+- The callback function is called with the fetched data after the delay.
+
+### 5. **Error Handling with Callbacks**
+
+When dealing with asynchronous operations, it's common to handle errors through callbacks.
+
+#### Example:
+
+```typescript
+function fetchDataWithErrorHandling(callback: (error: Error | null, data?: string) => void): void {
+  setTimeout(() => {
+    try {
+      const data = 'Fetched data';
+      callback(null, data);  // No error
+    } catch (error) {
+      callback(error as Error);  // Pass the error
+    }
+  }, 1000);
+}
+
+fetchDataWithErrorHandling((error, data) => {
+  if (error) {
+    console.error(`Error: ${error.message}`);
+  } else {
+    console.log(`Received: ${data}`);  // Outputs: "Received: Fetched data"
+  }
+});
+```
+
+In this example:
+- `fetchDataWithErrorHandling` accepts a callback that handles both errors and data.
+- The callback function checks for errors and processes the data accordingly.
+
+### Summary
+
+- **Basic Callback**: Functions passed as arguments and executed within another function.
+- **Callback with Parameters**: Callbacks can take arguments, enabling more dynamic behavior.
+- **Callback Types**: Define specific types for callbacks to enforce type safety.
+- **Async Callbacks**: Useful for handling asynchronous operations with functions like `setTimeout`.
+- **Error Handling**: Callbacks can be used to handle errors in asynchronous functions.
+
+Callbacks are a powerful way to manage asynchronous operations and event-driven programming in TypeScript, and understanding how to use them effectively is crucial for writing robust, maintainable code.
+
+## Rest Parameters
+
+In TypeScript, **rest parameters** allow a function to accept an indefinite number of arguments as an array. This feature is useful when you don't know how many arguments will be passed to a function, or you want to handle multiple parameters efficiently.
+
+### Key Points:
+
+1. **Rest Parameters**:
+   - Represent an unknown number of arguments.
+   - The syntax uses the spread operator (`...`) followed by the parameter name.
+   - The rest parameter must be the **last parameter** in the function signature.
+
+2. **Type for Rest Parameters**:
+   - The rest parameter can be typed as an array of a specific type (e.g., `number[]`, `string[]`).
+   - This ensures that all elements passed in as arguments must conform to that type.
+
+### Syntax
+
+```typescript
+function functionName(...paramName: type[]): returnType {
+  // Function logic
+}
+```
+
+### Example: Adding Multiple Numbers
+
+```typescript
+function sum(...numbers: number[]): number {
+  return numbers.reduce((acc, curr) => acc + curr, 0);
+}
+
+console.log(sum(1, 2, 3));  // Outputs: 6
+console.log(sum(10, 20, 30, 40));  // Outputs: 100
+```
+
+- `sum` is a function that accepts any number of `number` arguments.
+- The `numbers` parameter is of type `number[]` (an array of numbers).
+- Inside the function, the array is processed using `reduce` to compute the sum.
+
+### Example: Rest Parameters with Other Parameters
+
+You can combine regular parameters with rest parameters, but the rest parameter must always come last.
+
+```typescript
+function greet(greeting: string, ...names: string[]): string {
+  return `${greeting}, ${names.join(', ')}!`;
+}
+
+console.log(greet('Hello', 'Alice', 'Bob', 'Charlie'));  // Outputs: "Hello, Alice, Bob, Charlie!"
+```
+
+In this example:
+- The function `greet` accepts a regular parameter `greeting` and a rest parameter `names`.
+- The `names` parameter collects all the additional string arguments into an array.
+
+### Example: Rest Parameters in Callback Functions
+
+Rest parameters can also be useful when working with callbacks, especially in situations where the number of arguments passed to a callback may vary.
+
+```typescript
+function executeCallback(callback: (...args: number[]) => void, ...numbers: number[]): void {
+  callback(...numbers);
+}
+
+executeCallback((...nums) => {
+  console.log(`Sum: ${nums.reduce((acc, curr) => acc + curr, 0)}`);
+}, 1, 2, 3, 4);  // Outputs: "Sum: 10"
+```
+
+In this example:
+- `executeCallback` accepts a callback function and a rest parameter `numbers`.
+- The rest parameter `numbers` is spread into the callback function using the spread operator `...`.
+
+### Benefits of Using Rest Parameters:
+
+1. **Flexible Argument Length**: You can write functions that work with any number of arguments.
+2. **Cleaner Code**: Reduces the need for overloading or checking the number of arguments manually.
+3. **Works with Arrays**: The rest parameter is naturally an array, so you can use array methods like `map`, `filter`, `reduce`, etc.
+
+### Example: Rest Parameters with Default Parameters
+
+You can also combine rest parameters with default parameters, though the default parameter must come before the rest parameter.
+
+```typescript
+function createList(item: string = 'Item', ...otherItems: string[]): string[] {
+  return [item, ...otherItems];
+}
+
+console.log(createList());  // Outputs: ["Item"]
+console.log(createList('Apple', 'Banana', 'Cherry'));  // Outputs: ["Apple", "Banana", "Cherry"]
+```
+
+In this example:
+- `item` has a default value, and `otherItems` is a rest parameter that collects the remaining arguments.
+
+### Summary
+
+- **Rest Parameters** allow functions to accept an indefinite number of arguments as an array.
+- They are defined with the syntax `...paramName: type[]`, where `paramName` is the rest parameter and `type[]` is the array type.
+- Rest parameters must always be the last parameter in the function signature.
+- They are useful for handling varying numbers of arguments in a clean and efficient way.
+
+## Method Overloading
+
+In TypeScript, **function overloading** allows you to define multiple function signatures for a single function, enabling it to handle different types or numbers of arguments. While TypeScript doesn't allow true runtime function overloading (like some other languages such as Java or C++), it uses a feature called "overload signatures" to simulate this behavior at compile time.
+
+### Key Points:
+
+1. **Overload Signatures**: You can define multiple signatures for a function, specifying the different combinations of parameters and return types the function can accept.
+2. **Implementation**: The actual function implementation must handle all the variations of the overloads.
+3. **Type Safety**: TypeScript enforces type safety by checking the arguments passed to the overloaded function against the defined signatures.
+
+### Syntax
+
+```typescript
+function functionName(param1: type1): returnType;
+function functionName(param1: type1, param2: type2): returnType;
+// ...additional signatures...
+function functionName(param1: type1, param2?: type2): returnType {
+  // Function implementation
+}
+```
+
+### Example: Overloading Based on Number of Parameters
+
+```typescript
+function add(a: number, b: number): number;          // Overload 1
+function add(a: string, b: string): string;          // Overload 2
+function add(a: number, b: number, c: number): number; // Overload 3
+
+// Function implementation
+function add(a: any, b: any, c?: any): any {
+  if (typeof a === "number" && typeof b === "number" && typeof c === "number") {
+    return a + b + c;  // Handling three numbers
+  } else if (typeof a === "number" && typeof b === "number") {
+    return a + b;  // Handling two numbers
+  } else if (typeof a === "string" && typeof b === "string") {
+    return a + b;  // Handling two strings (concatenation)
+  }
+}
+
+console.log(add(1, 2));           // Outputs: 3 (number)
+console.log(add(1, 2, 3));        // Outputs: 6 (number)
+console.log(add("Hello, ", "World!"));  // Outputs: "Hello, World!" (string)
+```
+
+### Explanation:
+
+- **Overload Signatures**:
+  - The function `add` is overloaded to handle three cases: adding two numbers, concatenating two strings, or adding three numbers.
+  
+- **Implementation**:
+  - The actual `add` function checks the types of the arguments and handles each case accordingly.
+  - The `c?` parameter is optional (`undefined` when only two arguments are passed).
+
+### Example: Overloading with Different Return Types
+
+You can also use overloads to define different return types based on the parameters passed.
+
+```typescript
+function reverse(value: string): string;   // Overload 1
+function reverse(value: number[]): number[]; // Overload 2
+
+// Function implementation
+function reverse(value: string | number[]): string | number[] {
+  if (typeof value === "string") {
+    return value.split("").reverse().join("");  // Reverse the string
+  } else {
+    return value.slice().reverse();  // Reverse the array of numbers
+  }
+}
+
+console.log(reverse("TypeScript"));  // Outputs: "tpircSepyT"
+console.log(reverse([1, 2, 3, 4]));  // Outputs: [4, 3, 2, 1]
+```
+
+### Explanation:
+
+- **Overload Signatures**:
+  - The `reverse` function has two overloads: one for reversing a string and one for reversing an array of numbers.
+  
+- **Implementation**:
+  - The function handles both strings and arrays, returning the appropriate type (`string` or `number[]`).
+
+### Example: Overloading with Optional Parameters
+
+You can combine function overloading with optional parameters to handle cases where not all parameters are always passed.
+
+```typescript
+function greet(name: string): string;                 // Overload 1
+function greet(name: string, greeting: string): string; // Overload 2
+
+// Function implementation
+function greet(name: string, greeting?: string): string {
+  if (greeting) {
+    return `${greeting}, ${name}!`;
+  } else {
+    return `Hello, ${name}!`;
+  }
+}
+
+console.log(greet("Alice"));              // Outputs: "Hello, Alice!"
+console.log(greet("Alice", "Good morning")); // Outputs: "Good morning, Alice!"
+```
+
+### Explanation:
+
+- **Overload Signatures**:
+  - There are two overloads: one that accepts only a name, and one that accepts both a name and a custom greeting.
+  
+- **Optional Parameter**:
+  - The `greeting` parameter is optional (`?`), and the function behaves differently based on whether it is provided.
+
+### Rules for Overloading:
+
+1. **Multiple Overload Signatures**: You can define multiple overload signatures for a single function.
+2. **Implementation**: The actual function implementation should be a single function that can handle all overloads.
+3. **Argument Matching**: TypeScript will match the function call with the correct overload based on the number and type of arguments.
+4. **Return Type**: The return type of the overloads must be consistent with the function implementation. TypeScript checks that the implementation satisfies the declared overloads.
+
+### Example: Handling Different Parameter Types
+
+You can overload functions to accept different types of arguments, and handle them accordingly.
+
+```typescript
+function format(value: string): string;            // Overload 1
+function format(value: number): string;            // Overload 2
+
+// Function implementation
+function format(value: string | number): string {
+  if (typeof value === "string") {
+    return value.toUpperCase();  // Handle string
+  } else {
+    return value.toFixed(2);     // Handle number, formatting to 2 decimal places
+  }
+}
+
+console.log(format("hello"));   // Outputs: "HELLO"
+console.log(format(123.456));   // Outputs: "123.46"
+```
+
+### Summary
+
+- **Function Overloading** in TypeScript allows defining multiple signatures for a single function.
+- You can overload based on the number of parameters, their types, or both.
+- The function implementation must handle all the overload signatures, and TypeScript ensures type safety based on the overloads.
+- Overloading provides flexibility while maintaining strict type-checking, enabling more robust code.
+
+
+# Generics
+
+Generics in TypeScript provide a way to create reusable components that work with a variety of data types, while maintaining type safety. They allow you to define functions, classes, and interfaces that can operate on different types without losing the benefits of strong typing.
+
+### Why Use Generics?
+Generics allow for:
+1. **Type Safety:** They ensure that the data types being passed into functions, classes, or interfaces are consistent and correct.
+2. **Code Reusability:** The same function or class can handle multiple types, avoiding the need to rewrite code for different types.
+
+### Syntax
+The typical syntax for a generic in TypeScript involves using angle brackets (`<>`) with a type variable (e.g., `T`).
+
+### Example 1: Generic Function
+
+A simple generic function to return the input value can look like this:
+
+```typescript
+function identity<T>(value: T): T {
+    return value;
+}
+
+let stringResult = identity<string>("Hello");
+let numberResult = identity<number>(42);
+```
+
+Here, `T` is a placeholder for the type, which will be inferred or explicitly provided when the function is called.
+
+### Example 2: Generic Classes
+
+Generics are also useful in classes. For example, a generic `Box` class can store and retrieve any type of data:
+
+```typescript
+class Box<T> {
+    private content: T;
+
+    constructor(value: T) {
+        this.content = value;
+    }
+
+    getContent(): T {
+        return this.content;
+    }
+}
+
+let stringBox = new Box<string>("Hello");
+let numberBox = new Box<number>(123);
+```
+
+### Example 3: Generic Interfaces
+
+You can define interfaces that work with generics as well:
+
+```typescript
+interface Pair<K, V> {
+    key: K;
+    value: V;
+}
+
+let pair: Pair<string, number> = { key: "age", value: 30 };
+```
+
+### Example 4: Generic Constraints
+
+You can constrain generics to specific types, ensuring that the types passed meet certain criteria. For example, if you want a function that works only with objects that have a `length` property:
+
+```typescript
+function logLength<T extends { length: number }>(value: T): void {
+    console.log(value.length);
+}
+
+logLength("Hello"); // Works because string has a length
+logLength([1, 2, 3]); // Works because array has a length
+```
+
+### Conclusion
+
+Generics provide flexibility and reusability, allowing TypeScript code to be more adaptable while still enforcing strict typing.
+
+# Problems with Generics and String
+
+If you're encountering issues with generics while returning strings in TypeScript, it could stem from how the type is inferred or enforced by the generic. When you return a string but use a generic type, TypeScript expects the return type to match the generic parameter, which can cause a mismatch if you're not handling types correctly.
+
+Let's break down a few common scenarios where this issue can occur:
+
+### Scenario 1: Mismatched Return Type
+
+Suppose you define a generic function but always return a string regardless of the input type. This will cause a type mismatch because the return type must match the generic type.
+
+```typescript
+function getValue<T>(value: T): T {
+    return "This is a string"; // Error: Type 'string' is not assignable to type 'T'
+}
+```
+
+### Solution:
+You need to ensure that the return type is of the generic type `T`. If you want the function to always return a string regardless of the generic type, then you shouldn’t use a generic type for the return value.
+
+#### Option 1: Remove the Generic and Return a String
+If you always want to return a string, you don’t need a generic:
+
+```typescript
+function getValue(value: any): string {
+    return "This is a string";
+}
+```
+
+#### Option 2: Use a Generic with a Specific Return Type
+If you need the flexibility of generics but also want to ensure that a string is returned in some cases, you can restrict the generic type or use conditional logic:
+
+```typescript
+function getValue<T>(value: T): T | string {
+    if (typeof value === "string") {
+        return value; // Return the input if it's a string
+    } else {
+        return "This is a string"; // Otherwise, return a default string
+    }
+}
+```
+
+### Scenario 2: Generic Function Returning a Fixed String
+
+If your function is supposed to handle multiple types but return a fixed string regardless of the input type, TypeScript will complain because it expects the return type to match the generic type.
+
+For example:
+
+```typescript
+function processValue<T>(value: T): T {
+    return "Processed"; // Error: Type 'string' is not assignable to type 'T'
+}
+```
+
+### Solution:
+If your function must return a string regardless of the input type but you still want to accept different types, you can declare the return type as `string` explicitly:
+
+```typescript
+function processValue<T>(value: T): string {
+    return "Processed";
+}
+```
+
+Alternatively, if the return type must depend on the input type (while handling the string case), you could do something like this:
+
+```typescript
+function processValue<T>(value: T): T | string {
+    if (typeof value === "string") {
+        return `Processed: ${value}`;
+    }
+    return "Processed"; // Fallback to a string for other types
+}
+```
+
+### Scenario 3: Returning a Specific Property of a String
+
+If you are dealing with objects that could be strings and trying to access a property that only exists on strings, you need to narrow the type.
+
+Example:
+
+```typescript
+function getLength<T>(value: T): number {
+    return value.length; // Error: Property 'length' does not exist on type 'T'
+}
+```
+
+### Solution:
+You can constrain the generic to ensure that the type has a `length` property (like a string or an array):
+
+```typescript
+function getLength<T extends { length: number }>(value: T): number {
+    return value.length;
+}
+```
+
+### Conclusion
+
+Generics are useful for maintaining flexibility, but they come with the responsibility of ensuring type consistency. If you are always returning a string but using generics, make sure you handle the return type properly, either by explicitly returning a `string` or by using conditional logic to satisfy TypeScript's type-checking system.
+
+# TypeCasting and Type Assertion
+
+Type assertion and type casting in TypeScript are used to tell the TypeScript compiler what the intended type of a variable or expression should be. While similar, they serve slightly different purposes and are syntactically distinct. Both allow you to override TypeScript's inferred types in cases where you are certain of the type, but the compiler isn't.
+
+### 1. **Type Assertion**
+
+Type assertion is used when you know the actual type of a variable more accurately than TypeScript. It's a way to tell the compiler to treat a variable as a certain type, overriding its inferred type. Type assertion doesn't change the actual data type at runtime; it only affects the static type checking during development.
+
+There are two syntaxes for type assertions:
+- **Angle bracket syntax**: `<Type>value`
+- **`as` syntax**: `value as Type`
+
+#### Example 1: Using `as` Syntax
+
+```typescript
+let someValue: unknown = "This is a string";
+let stringLength: number = (someValue as string).length;
+```
+
+Here, `someValue` is of type `unknown` (it could be anything). By asserting `someValue` as a `string`, we can safely access its `length` property.
+
+#### Example 2: Using Angle Brackets
+
+```typescript
+let anotherValue: unknown = "Another string";
+let anotherLength: number = (<string>anotherValue).length;
+```
+
+Both the `as` syntax and the angle bracket syntax achieve the same result.
+
+#### Important Notes:
+- **Type assertion only works in TypeScript.** At runtime, this has no effect on the underlying value.
+- **Use cases**: Type assertions are useful when interfacing with third-party libraries or APIs that return generic or ambiguous types such as `unknown`, `any`, or JSON data.
+- **You can't cast to unrelated types**: For example, you can't directly cast a string to a number unless you're absolutely certain of how to handle the conversion.
+
+### 2. **Type Casting**
+
+TypeScript does not have "type casting" in the same way as languages like C++ or Java. Instead, type assertion can sometimes be referred to as "casting" since it forces the TypeScript compiler to treat a variable as another type.
+
+If you come from languages with casting, it's worth noting that TypeScript's type assertion is a development-time feature, while casting in languages like C++ or Java actually transforms one data type into another at runtime.
+
+### Example of Type Assertion (often called casting):
+
+```typescript
+let someValue: unknown = "1234";
+let numericValue: number = parseInt(someValue as string, 10);  // "Casting" string to number using parseInt
+```
+
+In this case, while the `parseInt` function converts the string into a number, the type assertion tells the compiler that `someValue` is a string so that we can pass it to `parseInt`.
+
+### 3. **Difference Between Type Assertion and Type Casting**
+
+- **Type Assertion (in TypeScript)**: 
+  - This is purely a compile-time construct. It doesn't change the type at runtime. Instead, it instructs the TypeScript compiler to override its inferred type, but the value itself remains unchanged.
+  
+- **Type Casting (in other languages)**:
+  - This changes the type of a value at runtime, usually involving actual transformation of data (e.g., casting a floating-point number to an integer).
+
+### Type Assertion with DOM Elements
+
+Type assertion is often used when interacting with the DOM, where TypeScript doesn’t know the exact type of an element.
+
+```typescript
+let inputElement = document.getElementById("userInput") as HTMLInputElement;
+inputElement.value = "Hello, world!";
+```
+
+Here, `document.getElementById` returns an `HTMLElement | null`, but we assert that the element is specifically an `HTMLInputElement` so we can safely access its `value` property.
+
+### Type Assertion and Union Types
+
+If a variable has a union type (e.g., `string | number`), you can use type assertion to treat the variable as one of the possible types.
+
+```typescript
+function formatValue(value: string | number) {
+    if ((value as string).toUpperCase) {
+        return (value as string).toUpperCase();  // Treating 'value' as a string
+    }
+    return value.toString();  // Otherwise treating it as a number
+}
+```
+
+### Conclusion
+
+- **Type Assertion**: Instructs TypeScript to treat a value as a certain type, useful for narrowing down ambiguous types (`any`, `unknown`, or union types).
+- **Type Casting** (in TypeScript, through type assertions): No runtime transformation, only type checking during compile time.
+
+# Type Guards  and TypeScript Utility Types
+
+### **Type Guards in TypeScript**
+
+Type guards in TypeScript are functions or expressions that allow you to **narrow down the type** of a variable within a conditional block. TypeScript uses these guards to ensure type safety by understanding the specific type of a value during runtime.
+
+#### **Common Type Guards**
+
+1. **`typeof` Operator:**
+   The `typeof` operator is commonly used to narrow down types to primitive types like `string`, `number`, `boolean`, `symbol`, and `function`.
+
+   ```typescript
+   function printValue(value: string | number) {
+       if (typeof value === "string") {
+           console.log("String:", value.toUpperCase());  // Now TypeScript knows it's a string
+       } else {
+           console.log("Number:", value.toFixed(2));    // Here, it's narrowed to a number
+       }
+   }
+   ```
+
+2. **`instanceof` Operator:**
+   The `instanceof` operator checks whether an object is an instance of a particular class or constructor function.
+
+   ```typescript
+   class Dog {
+       bark() {
+           console.log("Woof!");
+       }
+   }
+
+   class Cat {
+       meow() {
+           console.log("Meow!");
+       }
+   }
+
+   function animalSound(animal: Dog | Cat) {
+       if (animal instanceof Dog) {
+           animal.bark(); // Dog methods are available here
+       } else {
+           animal.meow(); // Cat methods are available here
+       }
+   }
+   ```
+
+3. **`in` Operator:**
+   The `in` operator checks if an object has a particular property, which can be useful when working with objects that have different shapes.
+
+   ```typescript
+   interface Car {
+       drive(): void;
+   }
+
+   interface Boat {
+       sail(): void;
+   }
+
+   function operateVehicle(vehicle: Car | Boat) {
+       if ("drive" in vehicle) {
+           vehicle.drive(); // TypeScript knows it's a Car
+       } else {
+           vehicle.sail();  // TypeScript knows it's a Boat
+       }
+   }
+   ```
+
+4. **Custom Type Guards:**
+   You can define your own type guards using functions that return `value is Type`. This allows you to create specific checks for complex types.
+
+   ```typescript
+   interface Fish {
+       swim(): void;
+   }
+
+   interface Bird {
+       fly(): void;
+   }
+
+   function isFish(animal: Fish | Bird): animal is Fish {
+       return (animal as Fish).swim !== undefined;
+   }
+
+   function moveAnimal(animal: Fish | Bird) {
+       if (isFish(animal)) {
+           animal.swim();  // TypeScript knows it's a Fish
+       } else {
+           animal.fly();   // TypeScript knows it's a Bird
+       }
+   }
+   ```
+
+### **TypeScript Utility Types**
+
+TypeScript provides a set of built-in utility types that make it easier to manipulate types, especially in complex cases where we want to extract, modify, or combine existing types.
+
+#### **Common Utility Types**
+
+1. **`Partial<Type>`**
+   Constructs a type that makes all properties of `Type` optional.
+
+   ```typescript
+   interface User {
+       id: number;
+       name: string;
+       email: string;
+   }
+
+   const updateUser = (user: Partial<User>) => {
+       // Now all properties are optional
+       if (user.name) {
+           console.log(`Updating user name to: ${user.name}`);
+       }
+   };
+
+   updateUser({ name: "Alice" });
+   ```
+
+2. **`Required<Type>`**
+   Constructs a type that makes all properties of `Type` required.
+
+   ```typescript
+   interface User {
+       id?: number;
+       name?: string;
+   }
+
+   const fullUser: Required<User> = {
+       id: 1,
+       name: "Alice"
+   };
+   ```
+
+3. **`Readonly<Type>`**
+   Constructs a type where all properties of `Type` are read-only, meaning they cannot be reassigned.
+
+   ```typescript
+   interface Car {
+       make: string;
+       model: string;
+   }
+
+   const car: Readonly<Car> = {
+       make: "Toyota",
+       model: "Corolla"
+   };
+
+   // car.make = "Honda";  // Error: cannot reassign to a read-only property
+   ```
+
+4. **`Record<Keys, Type>`**
+   Constructs an object type where the keys are from a union type `Keys` and the values are of type `Type`.
+
+   ```typescript
+   type Status = "success" | "error" | "loading";
+   const statuses: Record<Status, string> = {
+       success: "Operation was successful",
+       error: "There was an error",
+       loading: "Loading, please wait..."
+   };
+   ```
+
+5. **`Pick<Type, Keys>`**
+   Constructs a type by picking a set of properties from `Type`.
+
+   ```typescript
+   interface User {
+       id: number;
+       name: string;
+       email: string;
+       age: number;
+   }
+
+   type UserPreview = Pick<User, "id" | "name">;
+
+   const user: UserPreview = {
+       id: 1,
+       name: "Alice"
+   };
+   ```
+
+6. **`Omit<Type, Keys>`**
+   Constructs a type by omitting a set of properties from `Type`.
+
+   ```typescript
+   interface User {
+       id: number;
+       name: string;
+       email: string;
+       age: number;
+   }
+
+   type UserWithoutEmail = Omit<User, "email">;
+
+   const user: UserWithoutEmail = {
+       id: 1,
+       name: "Alice",
+       age: 25
+   };
+   ```
+
+7. **`Exclude<Type, ExcludedUnion>`**
+   Constructs a type by excluding from `Type` all union members that are assignable to `ExcludedUnion`.
+
+   ```typescript
+   type MyUnion = "a" | "b" | "c";
+   type ExcludedUnion = Exclude<MyUnion, "a">;  // "b" | "c"
+   ```
+
+8. **`Extract<Type, Union>`**
+   Constructs a type by extracting from `Type` all union members that are assignable to `Union`.
+
+   ```typescript
+   type MyUnion = "a" | "b" | "c";
+   type ExtractedUnion = Extract<MyUnion, "a" | "b">;  // "a" | "b"
+   ```
+
+9. **`NonNullable<Type>`**
+   Constructs a type by excluding `null` and `undefined` from `Type`.
+
+   ```typescript
+   type NullableType = string | null | undefined;
+   type NonNullableType = NonNullable<NullableType>;  // string
+   ```
+
+10. **`ReturnType<Type>`**
+    Constructs a type consisting of the return type of a function `Type`.
+
+    ```typescript
+    function getUser() {
+        return { id: 1, name: "Alice" };
+    }
+
+    type UserType = ReturnType<typeof getUser>;  // { id: number, name: string }
+    ```
+
+11. **`Parameters<Type>`**
+    Constructs a tuple type from the types used in the parameters of a function `Type`.
+
+    ```typescript
+    function login(username: string, password: string) {
+        // login logic
+    }
+
+    type LoginParams = Parameters<typeof login>;  // [string, string]
+    ```
+
+### **Conclusion**
+
+- **Type Guards** in TypeScript are used to narrow down the type of a variable at runtime, ensuring the compiler knows what type a variable is at any point.
+- **Utility Types** in TypeScript help transform, manipulate, and create new types from existing ones, improving code reusability and ensuring more precise type definitions.
